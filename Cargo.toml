@@ -4,3 +4,6 @@ version = "0.1.0"
 authors = ["Steven Fackler <sfackler@palantir.com>"]
 
 [dependencies]
+conduit = "0.8"
+hyper = { version = "0.9", default_features = false }
+semver = "0.5"
