@@ -175,6 +175,16 @@ impl<L> Server<L>
         &mut self.server
     }
 
+    pub fn handle<H>(self, handler: H) -> hyper::Result<Listening>
+        where H: conduit::Handler
+    {
+        let handler = Handler {
+            handler: handler,
+            scheme: self.scheme,
+        };
+        self.server.handle(handler)
+    }
+
     pub fn handle_threads<H>(self, handler: H, threads: usize) -> hyper::Result<Listening>
         where H: conduit::Handler
     {
