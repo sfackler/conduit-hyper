@@ -1,6 +1,7 @@
 extern crate conduit;
 extern crate hyper;
 extern crate semver;
+extern crate unicase;
 
 #[macro_use]
 extern crate log;
@@ -16,6 +17,7 @@ use std::collections::HashMap;
 use std::net::{SocketAddr, ToSocketAddrs};
 use std::io::{self, Read, Cursor};
 use std::str;
+use unicase::UniCase;
 
 struct Request<'a, 'b: 'a> {
     request: HyperRequest<'a, 'b>,
@@ -115,19 +117,25 @@ impl<'a, 'b> conduit::Request for Request<'a, 'b> {
     }
 }
 
-struct Headers(HashMap<String, Vec<String>>);
+struct Headers(Vec<(String, Vec<String>)>);
+
+impl Headers {
+    fn find_raw(&self, key: &str) -> Option<&[String]> {
+        self.0.iter().find(|&&(ref k, _)| UniCase(k) == key).map(|&(_, ref vs)| &**vs)
+    }
+}
 
 impl conduit::Headers for Headers {
     fn find(&self, key: &str) -> Option<Vec<&str>> {
-        self.0.get(key).map(|vs| vs.iter().map(|v| &**v).collect())
+        self.find_raw(key).map(|vs| vs.iter().map(|v| &**v).collect())
     }
 
     fn has(&self, key: &str) -> bool {
-        self.0.contains_key(key)
+        self.find_raw(key).is_some()
     }
 
     fn all(&self) -> Vec<(&str, Vec<&str>)> {
-        self.0.iter().map(|(k, vs)| (&**k, vs.iter().map(|v| &**v).collect())).collect()
+        self.0.iter().map(|&(ref k, ref vs)| (&**k, vs.iter().map(|v| &**v).collect())).collect()
     }
 }
 
@@ -214,7 +222,7 @@ impl<H> hyper::server::Handler for Handler<H>
         let mut request = Request {
             request: request,
             scheme: self.scheme,
-            headers: Headers(headers),
+            headers: Headers(headers.into_iter().collect()),
             extensions: conduit::Extensions::new(),
         };
 
