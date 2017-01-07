@@ -17,7 +17,7 @@ use std::net::{SocketAddr, ToSocketAddrs};
 use std::io::{self, Read, Cursor};
 use std::str;
 
-pub struct Request<'a, 'b: 'a> {
+struct Request<'a, 'b: 'a> {
     request: HyperRequest<'a, 'b>,
     scheme: conduit::Scheme,
     headers: Headers,
@@ -115,7 +115,7 @@ impl<'a, 'b> conduit::Request for Request<'a, 'b> {
     }
 }
 
-pub struct Headers(HashMap<String, Vec<String>>);
+struct Headers(HashMap<String, Vec<String>>);
 
 impl conduit::Headers for Headers {
     fn find(&self, key: &str) -> Option<Vec<&str>> {
