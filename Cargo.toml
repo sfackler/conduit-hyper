@@ -7,3 +7,4 @@ authors = ["Steven Fackler <sfackler@palantir.com>"]
 conduit = "0.8"
 hyper = { version = "0.9", default_features = false }
 semver = "0.5"
+log = "0.3"
