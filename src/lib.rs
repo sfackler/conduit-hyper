@@ -250,8 +250,8 @@ impl<H> hyper::server::Handler for Handler<H>
     }
 }
 
-fn respond<'a>(response: Response<'a, Fresh>, body: &mut Read) -> io::Result<()> {
+fn respond<'a>(response: Response<'a, Fresh>, body: &mut Box<conduit::WriteBody + Send>) -> io::Result<()> {
     let mut response = response.start()?;
-    io::copy(body, &mut response)?;
+    body.write_body(&mut response)?;
     response.end()
 }
